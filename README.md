@@ -56,15 +56,18 @@ In the morning, I began my journey to find out how I was going to gain access to
 
 ## Data Preparation
 
-I contacted a friend of mine on Twitter, known as Rukayat Rauf, who is also a data analyst, for help when I couldn't understand anything earlier. She also can't use Snowflake, so I have to carry my cross, but she promised to provide support.
+I contacted a friend of mine on Twitter, Rukayat Rauf, who is also a data analyst, for help when I couldn't understand anything earlier. She also can't use Snowflake, so I must carry my cross, but she promised to provide support.
 
 After spending time figuring out how to get my data out of raw data and being able to start my data cleaning, I used the below code to copy my table from raw data into **TEAM DATA-DRIVEN**
 
 ### Copy or Duplicate tables with records from an existing table
 
+```SQL
 Create Table weatherdataraw_NEW AS SELECT*
 
 FROM DFA23RAWDATA.RAWDATA.weatherdataraw
+
+```
 
 The above query with the select statement and “*” creates a new table and copies the columns and rows into it
 
@@ -91,98 +94,126 @@ Tables:
 
 My friend, **Rukayat**, helped me with the assessment of the dataset by checking each table to find what data cleaning process the data in the table needs and writing it as a comment in the query
 
-To avoid wasting time, since the data assessment process is similar across all tables, I will be sharing two table assessment queries.
+Since the data assessment process is similar across all tables, I will be sharing two table assessment queries to avoid wasting time.
 
 The Sensor data table assessment: contains only numerical values
 
-SELECT * FROM sensordataraw_new; -- contains 7 columns and 1,
+```SQL
+SELECT * 
+FROM sensordataraw_new; -- contains 7 columns and 1,
+```
 
 _Check if the Sensor ID column contains null values_
 
+```SQL
 SELECT sensor_id, COUNT(sensor_id) 
 FROM sensordataraw_new
 GROUP BY sensor_id
 HAVING COUNT(sensor_id)> 1;
+```
 
-SELECT *  _contains character "" and need to be removed_
+```SQL
+SELECT *  _--contains character null and needs to be removed_
 FROM sensordataraw_new
 WHERE sensor_id = 'NA';  _there are no null values_
+```
 
 _Assessing the Timestamp column (Incorrect datatype, contains character "" and need to be removed)_
 
+```SQL
 SELECT *
 FROM sensordataraw_new
 WHERE timestamp is NULL; _no null rows, no empty rows and no NAs _
+```
 
 _Assessing the Temperature column (Incorrect data type, change to decimal)_
 
+```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE temperature = 'NA'; _no null rows, no empty rows but contains 239,741 NAs_
+WHERE temperature = 'NA'; _--no null rows, no empty rows but contains 239,741 NAs_
+```
 
 _Assessing the Humidity column (Incorrect data type, change to decimal)_
 
+```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE humidity  = 'NA';  _no null rows, no empty rows but contains 239,972 NAs_
+WHERE humidity  = 'NA';  _--no null rows, no empty rows but contains 239,972 NAs_
+```
 
 _Assessing the light_intensity column (Incorrect data type, change to decimal)_
 
+```SQL
 SELECT *
 FROM sensordataraw_new
 WHERE light_intensity  = 'NA'; _no null rows, no empty rows but contains 240,239 NAs_
+```
 
 _Assessing the battery_level column (Incorrect data type, change to decimal)_
 
+```SQL
 SELECT *
 FROM sensordataraw_new
 WHERE battery_level = 'NA'; _column is okay, no null rows, no empty,no NAs_
+```
 
 **Data cleaning for this table**
 
-1. Remove the "" from the sensor_id column
-2. Remove the "" from the timestamp and  Change the data type to the datetime
-3. Replace the NA in the Temperature, Humidity, Soil_moisture and light_intensity columnns with the mean, median or mode  and change their datatypes to decimal
+1. Remove the missing values from the sensor_id column
+2. Remove the missing values from the timestamp and  Change the data type to the datetime
+3. Replace the NA in the Temperature, Humidity, Soil_moisture and light_intensity columns with the mean, median or mode  and change their datatypes to decimal
 
 The Weather data table contains both categorical and numerical data
 
 _Assess the timestamp column (Incorrect data type)_
 
+```SQL
 SELECT * FROM weatherdataraw_new
 WHERE TIMESTAMP is null; _511,502 columns are null, delete all rows where the timestamp is null_
+```
 
 _Assess the columns with no data_
 
+```SQL
 SELECT * FROM weatherdataraw_new
 WHERE weather_condition = 'NA' And wind_speed = 'NA' AND precipitation = 'NA'; _4175 rows has no data in weather_condition, wind_speed and Precipitation.. Delete them_
+```
 
 _Assess the weather_condition column_
 
+```SQL
 SELECT * FROM weatherdataraw_new
-WHERE weather_condition = 'NA'; _511,502 columns are null, 419,683 are NA delete all rows where timestamp is null_
+WHERE weather_condition = 'NA'; _--511,502 columns are null, 419,683 are NA delete all rows where timestamp is null_
+```
 
+```
 SELECT DISTINCT(weather_condition), COUNT(weather_condition)
 FROM weatherdataraw_new
-GROUP BY weather_condition; _Clear was misspelled as Claar and needs to be changed to Clear, there are 20,703 of them_
+GROUP BY weather_condition; _--Clear was misspelled as Claar and needs to be changed to Clear, there are 20,703 of them_
+```
 
 _Assess the wind_speed column (change the data type to decimal after dealing with the NA rows)_
 
+```SQL
 SELECT * 
 FROM weatherdataraw_new
 WHERE wind_speed is null; _511,502 columns are null, 210,148 are NA, no empty rows_
+```
 
 _Assess the precipitation column (change the data type to decimal after dealing with the NA rows)_
 
+```SQL
 SELECT * 
 FROM weatherdataraw_new
 WHERE precipitation = 'NA'; _511,502 columns are null, 209,703 are NA, no empty rows_
-
+```
 ---
 Moving on, As she was assessing it, I was performing the cleaning.
 
-I faced some challenges doing the cleaning because, like I said earlier, some syntax is actually operating differently on Snowflake
+I faced some challenges doing the cleaning because, like I said earlier, some syntax is operating differently on Snowflake
 
-## Data Type yawa (problem in english)
+## Data Type yawa (a problem in English)
 
 I encountered an issue when I was trying to change my first cleaning table datatype. All the column datatypes were in **VARCHAR (16777216)**, which is the snowflake maximum character. So, it means I will be changing all column datatypes in each column, whether they are correct or not.
 
@@ -192,8 +223,10 @@ Changing data type is very different in Snowflake, as you can't just update or a
 
 After cleaning my first table (code below), I tried to change the data by using the normal SQL server ALTER TABLE statement, but it didn't work.
 
+```SQL
 Alter Table Cropdataraw_new
 Alter Column Crop_yield Decimal(8, 2);
+```
 
 I kept on having the below error.
 
@@ -203,7 +236,7 @@ I researched what was happening, and then I realized that Snowflake does not aut
 
 I found a video on **VCKLY Tech** YouTube channel that teaches how to resolve the “Cannot change column" error in Snowflake. Check it out [here](https://www.youtube.com/watch?v=z4lRX0ord9c)
 
-The video tutorial helped me solve other column datatype issues except the **timestamp column and timestamp datatype**.
+The video tutorial helped me solve other column datatype issues except for the **timestamp column and timestamp datatype**.
 
 > [!IMPORTANT]
 You Will find all the codes I used below
@@ -221,7 +254,7 @@ After an hour, she returned with a solution and it was a very small line of code
 > [!NOTE]
 Snowflake should work on their documentation; the technical content is not user-friendly at all and is very confusing. Other sources are better than Snowflake documentation
 
-Well, we spent 3 days on the whole cleaning; I started on Friday, while she joined me on Saturday, and we finished on Sunday, but we were not able to proceed because we couldn't perform modeling on Snowflake due to limited access control.
+Well, we spent 3 days on the whole cleaning; I started on Friday, while she joined me on Saturday, and we finished on Sunday, but we were not able to proceed because we couldn't perform modelling on Snowflake due to limited access control.
 
 The dataset is meant to be transformed using dbt (data build tool). I found out on Saturday on their discord and tried to research, and I even connected the snowflake to DBT, but I couldn't proceed from there.
 
@@ -231,27 +264,34 @@ My friend recommended we use the manual method since we can write SQL, and that 
 
 _Removed empty rows in the timestamp column_
 
+```SQL
 DELETE FROM cropdataraw_new
             WHERE timestamp is null -- 5 rows are nulls
+```
 
 _Removed All rows that contain NA in the crop_yied, growth_stage and pest_issue_
 
+```SQL
 DELETE
 FROM cropdataraw_new
 WHERE crop_yield = 'NA' AND growth_stage = 'NA' AND pest_issue = 'NA';   _52,945 rows have no data_
+```
 
 _Replace character in sensor_id with nothing (sensor_id contains unwanted character)_
 
+```
 UPDATE IRRIGATIONDATARAW_NEW
 
 SET
 
 SENSOR_ID = REPLACE(SENSOR_ID, '#', '')
+```
 
 _**Changing timestamp column data type**_
 
 _Rename the existing TIMESTAMP column to TIMESTAMPS_
 
+```SQL
 Alter table cropdataraw_new rename column TIMESTAMP to TIMESTAMPS
 
 _Add a new column to the table as TIMESTAMP with a TIMESTAMP_NTZ data type_
@@ -265,9 +305,11 @@ UPDATE cropdataraw_new
 SET
 
 TIMESTAMPS = REPLACE(TIMESTAMPS, '/', '-')
+```
 
 _Covert the timestamp column data format_
 
+```SQL
 UPDATE cropdataraw_new
 
 SET timestamp = to_timestamp(TO_VARCHAR(timestamps), 'MM-DD-YYYY HH24:MI')
@@ -297,18 +339,21 @@ Update cropdataraw_new set CROP_YIELD = CROP_YIELDS
 _Drop the old column_
 
 Alter table cropdataraw_new drop column CROP_YIELDS
+```
 
 _To deal with missing values using statistics Mean_
 
+```SQL
 UPDATE SENSORDATARAW_NEW 
 
 SET Humidity = (SELECT AVG(Humidity) FROM SENSORDATARAW_NEW WHERE Humidity != 'NA')
 WHERE Humidity ='NA';
+```
 
 The above queries are the major queries I ran on the dataset, only that I had to repeat it for each table or column
 
-I'm glad I put my pain in writing because hopefully it will save someone else from experiencing stress in the future. Even though my team and I were unable to submit this project due to problems we had, I should still mention that I learned a lot from it. I'm excited to have access to another type of DBs.
+I'm glad I put my pain in writing because hopefully, it will save someone else from experiencing stress in the future. Even though my team and I were unable to submit this project due to problems we had, I should still mention that I learned a lot from it. I'm excited to have access to another type of DBs.
 
 Thank you for reading about my experience. See you some other time.
 
-_My name is damilare damidez, a data analyst_
+_My name is Damilare Damidez, a data analyst_
