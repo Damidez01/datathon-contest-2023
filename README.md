@@ -115,7 +115,7 @@ HAVING COUNT(sensor_id)> 1;
 ```SQL
 SELECT *  _--contains character null and needs to be removed_
 FROM sensordataraw_new
-WHERE sensor_id = 'NA';  _there are no null values_
+WHERE sensor_id = 'NA';  --there are no null values_
 ```
 
 _Assessing the Timestamp column (Incorrect datatype, contains character "" and need to be removed)_
@@ -123,7 +123,7 @@ _Assessing the Timestamp column (Incorrect datatype, contains character "" and n
 ```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE timestamp is NULL; _no null rows, no empty rows and no NAs _
+WHERE timestamp is NULL; --no null rows, no empty rows and no NAs _
 ```
 
 _Assessing the Temperature column (Incorrect data type, change to decimal)_
@@ -131,7 +131,7 @@ _Assessing the Temperature column (Incorrect data type, change to decimal)_
 ```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE temperature = 'NA'; _--no null rows, no empty rows but contains 239,741 NAs_
+WHERE temperature = 'NA'; --no null rows, no empty rows but contains 239,741 NAs_
 ```
 
 _Assessing the Humidity column (Incorrect data type, change to decimal)_
@@ -139,7 +139,7 @@ _Assessing the Humidity column (Incorrect data type, change to decimal)_
 ```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE humidity  = 'NA';  _--no null rows, no empty rows but contains 239,972 NAs_
+WHERE humidity  = 'NA';  --no null rows, no empty rows but contains 239,972 NAs_
 ```
 
 _Assessing the light_intensity column (Incorrect data type, change to decimal)_
@@ -147,7 +147,7 @@ _Assessing the light_intensity column (Incorrect data type, change to decimal)_
 ```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE light_intensity  = 'NA'; _no null rows, no empty rows but contains 240,239 NAs_
+WHERE light_intensity  = 'NA'; --no null rows, no empty rows but contains 240,239 NAs_
 ```
 
 _Assessing the battery_level column (Incorrect data type, change to decimal)_
@@ -155,7 +155,7 @@ _Assessing the battery_level column (Incorrect data type, change to decimal)_
 ```SQL
 SELECT *
 FROM sensordataraw_new
-WHERE battery_level = 'NA'; _column is okay, no null rows, no empty,no NAs_
+WHERE battery_level = 'NA'; --column is okay, no null rows, no empty,no NAs_
 ```
 
 **Data cleaning for this table**
@@ -170,27 +170,27 @@ _Assess the timestamp column (Incorrect data type)_
 
 ```SQL
 SELECT * FROM weatherdataraw_new
-WHERE TIMESTAMP is null; _511,502 columns are null, delete all rows where the timestamp is null_
+WHERE TIMESTAMP is null; --511,502 columns are null, delete all rows where the timestamp is null_
 ```
 
 _Assess the columns with no data_
 
 ```SQL
 SELECT * FROM weatherdataraw_new
-WHERE weather_condition = 'NA' And wind_speed = 'NA' AND precipitation = 'NA'; _4175 rows has no data in weather_condition, wind_speed and Precipitation.. Delete them_
+WHERE weather_condition = 'NA' And wind_speed = 'NA' AND precipitation = 'NA'; --4175 rows has no data in weather_condition, wind_speed and Precipitation.. Delete them_
 ```
 
 _Assess the weather_condition column_
 
 ```SQL
 SELECT * FROM weatherdataraw_new
-WHERE weather_condition = 'NA'; _--511,502 columns are null, 419,683 are NA delete all rows where timestamp is null_
+WHERE weather_condition = 'NA'; --511,502 columns are null, 419,683 are NA delete all rows where timestamp is null
 ```
 
-```
+```SQL
 SELECT DISTINCT(weather_condition), COUNT(weather_condition)
 FROM weatherdataraw_new
-GROUP BY weather_condition; _--Clear was misspelled as Claar and needs to be changed to Clear, there are 20,703 of them_
+GROUP BY weather_condition; --Clear was misspelt as Claar and needs to be changed to Clear, there are 20,703 of them
 ```
 
 _Assess the wind_speed column (change the data type to decimal after dealing with the NA rows)_
@@ -198,7 +198,7 @@ _Assess the wind_speed column (change the data type to decimal after dealing wit
 ```SQL
 SELECT * 
 FROM weatherdataraw_new
-WHERE wind_speed is null; _511,502 columns are null, 210,148 are NA, no empty rows_
+WHERE wind_speed is null; --511,502 columns are null, 210,148 are NA, no empty rows
 ```
 
 _Assess the precipitation column (change the data type to decimal after dealing with the NA rows)_
@@ -206,7 +206,7 @@ _Assess the precipitation column (change the data type to decimal after dealing 
 ```SQL
 SELECT * 
 FROM weatherdataraw_new
-WHERE precipitation = 'NA'; _511,502 columns are null, 209,703 are NA, no empty rows_
+WHERE precipitation = 'NA'; --511,502 columns are null, 209,703 are NA, no empty rows
 ```
 ---
 Moving on, As she was assessing it, I was performing the cleaning.
@@ -274,7 +274,7 @@ _Removed All rows that contain NA in the crop_yied, growth_stage and pest_issue_
 ```SQL
 DELETE
 FROM cropdataraw_new
-WHERE crop_yield = 'NA' AND growth_stage = 'NA' AND pest_issue = 'NA';   _52,945 rows have no data_
+WHERE crop_yield = 'NA' AND growth_stage = 'NA' AND pest_issue = 'NA';   --52,945 rows have no data
 ```
 
 _Replace character in sensor_id with nothing (sensor_id contains unwanted character)_
@@ -294,11 +294,11 @@ _Rename the existing TIMESTAMP column to TIMESTAMPS_
 ```SQL
 Alter table cropdataraw_new rename column TIMESTAMP to TIMESTAMPS
 
-_Add a new column to the table as TIMESTAMP with a TIMESTAMP_NTZ data type_
+--Add a new column to the table as TIMESTAMP with a TIMESTAMP_NTZ data type
 
 Alter table cropdataraw_new add column TIMESTAMP TIMESTAMP_NTZ;
 
-_Update and replace the timestamp records from ‘/’ to ‘-’_
+--Update and replace the timestamp records from ‘/’ to ‘-’
 
 UPDATE cropdataraw_new
 
@@ -309,34 +309,38 @@ TIMESTAMPS = REPLACE(TIMESTAMPS, '/', '-')
 
 _Covert the timestamp column data format_
 
+
 ```SQL
 UPDATE cropdataraw_new
 
 SET timestamp = to_timestamp(TO_VARCHAR(timestamps), 'MM-DD-YYYY HH24:MI')
 
-_Copy the data in the old column to the new column_
+--Copy the data in the old column to the new column
 
 Update cropdataraw_new set TIMESTAMP = TIMESTAMPS
 
-_Drop the old column_
+--Drop the old column
 
 Alter table cropdataraw_new drop column TIMESTAMPS
+```
+
 
 _**To change other column data types**_
 
-_Rename the existing TIMESTAMP column to TIMESTAMPS_
+```
+--Rename the existing TIMESTAMP column to TIMESTAMPS
 
 Alter table cropdataraw_new rename column CROP_YIELD to CROP_YIELDS
 
-_Add new column to the table as CROP_YIELD with a DECIMAL data type_
+--Add new column to the table as CROP_YIELD with a DECIMAL data type
 
 Alter table cropdataraw_new add column CROP_YIELD DECIMAL(8, 2);
 
-_Copy the data in the old column to the new column_
+--Copy the data in the old column to the new column
 
 Update cropdataraw_new set CROP_YIELD = CROP_YIELDS
 
-_Drop the old column_
+--Drop the old column
 
 Alter table cropdataraw_new drop column CROP_YIELDS
 ```
